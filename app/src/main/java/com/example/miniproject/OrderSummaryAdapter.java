@@ -10,56 +10,83 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class OrderSummaryAdapter extends RecyclerView.Adapter<OrderSummaryAdapter.ViewHolder> {
+public class OrderSummaryAdapter extends RecyclerView.Adapter<OrderSummaryAdapter.OrderSummaryViewHolder> {
 
-    private List<CartItem> cartItems;
-    private OnItemDeletedListener onItemDeletedListener;
+    private List<CartItem> cartItems; // List to store cart items
+    private OnQuantityChangeListener onQuantityChangeListener; // Listener for quantity changes and item removal
 
-    public interface OnItemDeletedListener {
-        void onItemDeleted(int position, int itemPrice);
+    // Interface for quantity changes and item removal
+    public interface OnQuantityChangeListener {
+        void onQuantityChanged(int position, int newQuantity, int itemPrice);
+        void onItemRemoved(int position);
     }
 
-    public OrderSummaryAdapter(List<CartItem> cartItems, OnItemDeletedListener onItemDeletedListener) {
+    // Constructor for adapter
+    public OrderSummaryAdapter(List<CartItem> cartItems, OnQuantityChangeListener onQuantityChangeListener) {
         this.cartItems = cartItems;
-        this.onItemDeletedListener = onItemDeletedListener;
+        this.onQuantityChangeListener = onQuantityChangeListener;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cart_summary, parent, false);
-        return new ViewHolder(view);
+    public OrderSummaryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        // Inflate the layout for each item in the list
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_order_summary, parent, false);
+        return new OrderSummaryViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        CartItem item = cartItems.get(position);
-        holder.foodName.setText(item.getFoodName());
-        holder.foodPrice.setText("Price: " + item.getFoodPrice());
-        holder.foodQuantity.setText("Quantity: " + item.getQuantity());
+    public void onBindViewHolder(OrderSummaryViewHolder holder, int position) {
+        CartItem cartItem = cartItems.get(position); // Get cart item at current position
 
-        holder.deleteButton.setOnClickListener(v -> {
-            // Remove the item from the list and notify the adapter
-            cartItems.remove(position);
-            onItemDeletedListener.onItemDeleted(position, item.getFoodPrice() * item.getQuantity());
-            notifyItemRemoved(position);
+        // Set item details to the views
+        holder.foodName.setText(cartItem.getFoodName());
+        holder.foodPrice.setText("₹" + cartItem.getFoodPrice());
+        holder.quantityText.setText(String.valueOf(cartItem.getQuantity()));
+
+        // Set onClickListener for the "+" button to increase quantity
+        holder.buttonPlus.setOnClickListener(v -> {
+            int newQuantity = cartItem.getQuantity() + 1; // Increase quantity
+            cartItem.setQuantity(newQuantity); // Update cart item
+            holder.quantityText.setText(String.valueOf(newQuantity)); // Update UI
+            onQuantityChangeListener.onQuantityChanged(position, newQuantity, cartItem.getFoodPrice()); // Notify activity
+        });
+
+        // Set onClickListener for the "-" button to decrease quantity
+        holder.buttonMinus.setOnClickListener(v -> {
+            if (cartItem.getQuantity() > 1) {
+                int newQuantity = cartItem.getQuantity() - 1; // Decrease quantity
+                cartItem.setQuantity(newQuantity); // Update cart item
+                holder.quantityText.setText(String.valueOf(newQuantity)); // Update UI
+                onQuantityChangeListener.onQuantityChanged(position, newQuantity, cartItem.getFoodPrice()); // Notify activity
+            }
+        });
+
+        // Set onClickListener for the "Remove" button to remove item from cart
+        holder.buttonRemove.setOnClickListener(v -> {
+            onQuantityChangeListener.onItemRemoved(position); // Notify activity to remove item
         });
     }
 
     @Override
     public int getItemCount() {
-        return cartItems.size();
+        return cartItems.size(); // Return total number of items in the cart
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView foodName, foodPrice, foodQuantity;
-        Button deleteButton;
+    // ViewHolder class to represent each item in the RecyclerView
+    public class OrderSummaryViewHolder extends RecyclerView.ViewHolder {
 
-        public ViewHolder(View itemView) {
+        TextView foodName, foodPrice, quantityText;
+        Button buttonPlus, buttonMinus, buttonRemove;
+
+        public OrderSummaryViewHolder(View itemView) {
             super(itemView);
-            foodName = itemView.findViewById(R.id.foodName);
-            foodPrice = itemView.findViewById(R.id.foodPrice);
-            foodQuantity = itemView.findViewById(R.id.foodQuantity);
-            deleteButton = itemView.findViewById(R.id.buttonDelete);
+            // Initialize the views
+            foodName = itemView.findViewById(R.id.textView2);
+            foodPrice = itemView.findViewById(R.id.cartitemprice);
+            quantityText = itemView.findViewById(R.id.quantityText);
+            buttonPlus = itemView.findViewById(R.id.buttonPlus);
+            buttonMinus = itemView.findViewById(R.id.buttonMinus);
+            buttonRemove = itemView.findViewById(R.id.buttonRemove);
         }
     }
 }

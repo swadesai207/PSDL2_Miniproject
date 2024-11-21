@@ -1,37 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context=".OrderSummaryActivity">
+    android:layout_height="match_parent">
 
-    <!-- RecyclerView for displaying order items -->
+    <!-- RecyclerView to display order items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/orderItemsRecyclerView"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnBackToMenu"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Total Bill TextView -->
+    <!-- TextView for total bill -->
     <TextView
         android:id="@+id/tvTotalBill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Total Bill: ₹0"
-        android:textSize="16sp"
-        android:textColor="@android:color/holo_green_dark"
-        android:layout_marginBottom="32dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/orderItemsRecyclerView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Back to Menu Button -->
+    <!-- Back to menu button -->
     <Button
         android:id="@+id/btnBackToMenu"
         android:layout_width="wrap_content"
@@ -42,12 +40,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Save Order Button -->
+    <!-- Confirm Order button -->
     <Button
-        android:id="@+id/btnconfirm"
+        android:id="@+id/btnConfirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Confirm"
+        android:text="Confirm Order"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/btnBackToMenu"
         app:layout_constraintStart_toStartOf="parent"
