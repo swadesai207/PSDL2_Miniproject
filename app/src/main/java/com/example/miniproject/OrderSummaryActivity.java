@@ -1,5 +1,6 @@
 package com.example.miniproject;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -10,8 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class OrderSummaryActivity extends AppCompatActivity {
 
@@ -20,6 +20,9 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private TextView tvTotalBill;
     private List<CartItem> cartItems = new ArrayList<>();
     private int totalBill = 0;
+
+    // Create a HashMap to map item names to image resources
+    private HashMap<String, Integer> itemImageMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,12 +37,20 @@ public class OrderSummaryActivity extends AppCompatActivity {
         Button btnBackToMenu = findViewById(R.id.btnBackToMenu);
         Button btnConfirm = findViewById(R.id.btnConfirm);
 
-        // Get cart data from the intent (passed from the previous activity)
+        // Initialize the item-to-image map
+        itemImageMap = new HashMap<>();
+        itemImageMap.put("Aloo Pattice", R.drawable.pattice);  // Assuming the image name is aloo_pattice.png
+        itemImageMap.put("Thick Coffee", R.drawable.coldcoffee);
+        itemImageMap.put("Sandwich", R.drawable.chocolatesandwich);
+        itemImageMap.put("Fresh Juice", R.drawable.watermelonjuice);
+        itemImageMap.put("Garam Chai", R.drawable.chai);
+
+        // Get cart data from the intent
         Intent intent = getIntent();
         ArrayList<String> cartItemNames = intent.getStringArrayListExtra("cartItems");
         ArrayList<Integer> cartItemQuantities = intent.getIntegerArrayListExtra("cartQuantities");
 
-        // Convert the cart data into CartItem objects and calculate the total bill
+        // Convert to CartItem objects and calculate the total bill
         for (int i = 0; i < cartItemNames.size(); i++) {
             String itemName = cartItemNames.get(i);
             int quantity = cartItemQuantities.get(i);
@@ -52,10 +63,10 @@ public class OrderSummaryActivity extends AppCompatActivity {
         tvTotalBill.setText("Total Bill: ₹" + totalBill);
 
         // Set up RecyclerView with OrderSummaryAdapter
-        orderSummaryAdapter = new OrderSummaryAdapter(cartItems, new OrderSummaryAdapter.OnQuantityChangeListener() {
+        orderSummaryAdapter = new OrderSummaryAdapter(cartItems, itemImageMap, new OrderSummaryAdapter.OnQuantityChangeListener() {
             @Override
             public void onQuantityChanged(int position, int newQuantity, int itemPrice) {
-                // Update the quantity of the item and recalculate the total bill
+                // Update quantity and recalculate total bill
                 CartItem updatedItem = cartItems.get(position);
                 updatedItem.setQuantity(newQuantity);
                 totalBill = recalculateTotalBill();
@@ -64,12 +75,12 @@ public class OrderSummaryActivity extends AppCompatActivity {
 
             @Override
             public void onItemRemoved(int position) {
-                // Remove the item from the cart and update the total bill
+                // Remove the item from the list and update total bill
                 cartItems.remove(position);
                 totalBill = recalculateTotalBill();
                 tvTotalBill.setText("Total Bill: ₹" + totalBill);
 
-                // If no items are left in the cart, show a message and navigate back to the menu
+                // If no items left, show message and go back to menu
                 if (cartItems.isEmpty()) {
                     Toast.makeText(OrderSummaryActivity.this, "No items in cart. Redirecting to menu...", Toast.LENGTH_SHORT).show();
                     finish(); // Go back to the menu
@@ -77,14 +88,13 @@ public class OrderSummaryActivity extends AppCompatActivity {
             }
         });
 
-        // Set up RecyclerView with a LinearLayoutManager and the adapter
         orderItemsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         orderItemsRecyclerView.setAdapter(orderSummaryAdapter);
 
-        // Back to menu button: closes the activity and returns to the previous screen
+        // Back to menu button
         btnBackToMenu.setOnClickListener(v -> finish());
 
-        // Confirm order button: saves the order to the database if there are items in the cart
+        // Confirm order button
         btnConfirm.setOnClickListener(v -> {
             if (!cartItems.isEmpty()) {
                 saveOrderToDatabase();
@@ -102,7 +112,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
             case "Sandwich": return 40;
             case "Fresh Juice": return 30;
             case "Garam Chai": return 12;
-            default: return 0; // Default price if the item name is not recognized
+            default: return 0;
         }
     }
 
@@ -110,12 +120,12 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private int recalculateTotalBill() {
         int total = 0;
         for (CartItem item : cartItems) {
-            total += item.getFoodPrice() * item.getQuantity(); // Calculate total price for each item based on quantity
+            total += item.getFoodPrice() * item.getQuantity();
         }
         return total;
     }
 
-    // Method to save the order to the database (example function)
+    // Method to save the order to the database
     private void saveOrderToDatabase() {
         StringBuilder orderDetails = new StringBuilder();
         for (CartItem item : cartItems) {
@@ -126,12 +136,10 @@ public class OrderSummaryActivity extends AppCompatActivity {
 
         String timestamp = String.valueOf(System.currentTimeMillis());
         DatabaseHelper dbHelper = new DatabaseHelper(this);
-        dbHelper.insertOrder(orderDetails.toString(), totalBill, timestamp); // Save order details in database
+        dbHelper.insertOrder(orderDetails.toString(), totalBill, timestamp);
 
-        Toast.makeText(this, "Order confirmed successfully!", Toast.LENGTH_SHORT).show();
-
-        // Clear the cart and navigate back to the menu
-        cartItems.clear();
-        finish(); // Go back to the menu after confirming the order
+        Toast.makeText(this, "Ordered successfully!", Toast.LENGTH_SHORT).show();
+        cartItems.clear(); // Clear the cart after successful order
+        finish(); // Go back to the menu
     }
 }
