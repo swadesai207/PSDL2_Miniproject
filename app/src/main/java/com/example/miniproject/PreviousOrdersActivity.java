@@ -23,12 +23,13 @@ public class PreviousOrdersActivity extends AppCompatActivity {
         // Initialize DatabaseHelper
         dbHelper = new DatabaseHelper(this);
 
+        // Initialize the ListView where the previous orders will be displayed
         lvPreviousOrders = findViewById(R.id.lvPreviousOrders);
 
-        // Fetch previous orders
+        // Fetch previous orders from the database
         previousOrdersList = dbHelper.getAllOrders();
 
-        // Display orders in ListView
+        // Set up an adapter to bind the orders data to the ListView
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, previousOrdersList);
         lvPreviousOrders.setAdapter(adapter);
     }

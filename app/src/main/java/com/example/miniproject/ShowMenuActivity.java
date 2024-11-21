@@ -3,6 +3,7 @@ package com.example.miniproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,7 @@ public class ShowMenuActivity extends AppCompatActivity implements MenuAdapter.O
     private List<Integer> foodImages = new ArrayList<>();
     private List<String> cartItems = new ArrayList<>();
     private List<Integer> cartQuantities = new ArrayList<>();
+    private MenuAdapter menuAdapter; // Adapter instance for RecyclerView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +32,26 @@ public class ShowMenuActivity extends AppCompatActivity implements MenuAdapter.O
 
         // Set up RecyclerView
         RecyclerView recyclerView = findViewById(R.id.cartRecyclerView);
-        MenuAdapter adapter = new MenuAdapter(menuItems, foodPrices, foodImages, this);
-        recyclerView.setAdapter(adapter);
+        menuAdapter = new MenuAdapter(menuItems, foodPrices, foodImages, this); // Pass the menu data to the adapter
+        recyclerView.setAdapter(menuAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // SearchView for filtering menu items
+        SearchView searchView = findViewById(R.id.searchView); // Assuming there's a SearchView in your layout
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // No action needed on text submit
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Filter the items in the adapter
+                menuAdapter.getFilter().filter(newText);
+                return false;
+            }
+        });
 
         // Button to move to cart (OrderSummaryActivity)
         Button moveToCartButton = findViewById(R.id.button);
@@ -50,7 +69,7 @@ public class ShowMenuActivity extends AppCompatActivity implements MenuAdapter.O
     }
 
     private void initializeMenuData() {
-        // You can populate this data dynamically from your database, API, or other sources
+        // Populate the menu data (this can also be fetched from a database or API)
         menuItems.add("Aloo Pattice");
         menuItems.add("Thick Coffee");
         menuItems.add("Sandwich");
@@ -63,7 +82,7 @@ public class ShowMenuActivity extends AppCompatActivity implements MenuAdapter.O
         foodPrices.add("₹30");
         foodPrices.add("₹12");
 
-        foodImages.add(R.drawable.pattice);  // Replace with actual image resources
+        foodImages.add(R.drawable.pattice); // Replace with your actual image resources
         foodImages.add(R.drawable.coldcoffee);
         foodImages.add(R.drawable.chocolatesandwich);
         foodImages.add(R.drawable.watermelonjuice);
@@ -73,7 +92,7 @@ public class ShowMenuActivity extends AppCompatActivity implements MenuAdapter.O
     @Override
     public void onAddClick(String itemName, String itemPrice, int quantity) {
         if (quantity > 0) {
-            // Add item to the cart
+            // Add the selected item to the cart
             cartItems.add(itemName);
             cartQuantities.add(quantity);
             Toast.makeText(this, itemName + " added to cart!", Toast.LENGTH_SHORT).show();
